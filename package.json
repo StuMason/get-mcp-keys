@@ -1,7 +1,7 @@
 {
   "name": "@masonator/get-mcp-keys",
-  "version": "0.0.1",
-  "description": "A utility to load API keys from ~/.mcprc for Cursor MCP servers",
+  "version": "1.0.1",
+  "description": "A lightweight utility that securely loads API keys for Cursor MCP servers from your home directory, preventing accidental exposure of secrets in repositories. Keep your credentials safe while maintaining seamless integration with AI coding assistants.",
   "main": "index.js",
   "bin": {
     "get-mcp-keys": "./get-mcp-keys.js"
@@ -15,13 +15,23 @@
     "lint:fix": "eslint . --fix"
   },
   "keywords": [
-    "cursor",
-    "mcp",
     "api-keys",
-    "environment",
-    "secrets"
+    "secrets-management",
+    "environment-variables",
+    "security",
+    "cursor-ai",
+    "ai-tools",
+    "development-tools",
+    "nodejs",
+    "dotenv",
+    "configuration",
+    "mcp-server",
+    "credential-management",
+    "devsecops",
+    "security-tools",
+    "key-management"
   ],
-  "author": "Stuart Mason",
+  "author": "Stu Mason",
   "license": "MIT",
   "repository": {
     "type": "git",

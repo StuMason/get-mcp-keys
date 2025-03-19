@@ -91,6 +91,8 @@ Works with any MCP server that needs environment variables, including:
 
 `get-mcp-keys` reads your `.mcprc` file, adds those environment variables to the current environment, and then executes whatever command you specify after it in the args list. It's simple yet effective!
 
+![get-mcp-keys in action](./docs/example-setup.png)
+
 ## 📋 License
 
 MIT
