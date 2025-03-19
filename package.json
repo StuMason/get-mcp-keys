@@ -1,0 +1,41 @@
+{
+  "name": "@masonator/get-mcp-keys",
+  "version": "0.0.1",
+  "description": "A utility to load API keys from ~/.mcprc for Cursor MCP servers",
+  "main": "index.js",
+  "bin": {
+    "get-mcp-keys": "./get-mcp-keys.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "keywords": [
+    "cursor",
+    "mcp",
+    "api-keys",
+    "environment",
+    "secrets"
+  ],
+  "author": "Stuart Mason",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stumason/get-mcp-keys"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.6.0",
+    "eslint-plugin-security": "^3.0.1"
+  }
+}

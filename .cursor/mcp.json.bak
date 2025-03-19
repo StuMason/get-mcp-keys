@@ -1,0 +1,13 @@
+{
+    "mcpServers": {
+        "firecrawl": {
+            "command": "node",
+            "args": [
+                "/Users/stuartmason/Code/JeredBlu/get-mcp-keys.js",
+                "npx",
+                "-y",
+                "firecrawl-mcp"
+            ]
+        }
+    }
+}

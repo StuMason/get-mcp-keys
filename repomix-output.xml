@@ -1,0 +1,562 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+<additional_info>
+
+</additional_info>
+
+</file_summary>
+
+<directory_structure>
+.cursor/
+  rules/
+    coding-best-practices.md
+    database-rules.md
+    documentation-and-techstack.md
+    mcp-tool-usage.md
+.github/
+  workflows/
+    sec-check.yaml
+.eslintignore
+.eslintrc.json
+.gitignore
+get-mcp-keys.js
+package.json
+README.md
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".cursor/rules/coding-best-practices.md">
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+## Coding Best Practices
+
+- **Do not modify code or UI elements that already work**, unless explicitly instructed.
+- Avoid duplicating existing functionality; reuse working components whenever possible.
+- Write comprehensive tests for all new or modified functionality.
+- **Never unintentionally delete data or code**; confirm explicitly before destructive actions.
+- Commit frequently to maintain a reliable project history.
+- Always ask clarifying questions if tasks or requirements are unclear.
+
+## User Interface (UI)
+
+- **Never change or affect the UI unintentionally.** Only alter UI components if explicitly instructed or clearly part of the assigned task.
+- Always ensure UI changes are fully tested and validated.
+</file>
+
+<file path=".cursor/rules/database-rules.md">
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+## Supabase (Postgres MCP - Development Only)
+
+- Always use the project-specific **Supabase MCP server** for database operations.
+- Use structured relational SQL storage provided by Supabase. Avoid using raw JSON file storage for structured data unless explicitly required by schema design.
+- Database operations are **strictly for the development environment only**.
+- **Never delete or alter critical data without explicit confirmation.** Operations should be carefully controlled.
+</file>
+
+<file path=".cursor/rules/documentation-and-techstack.md">
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+## Documentation Usage
+
+- Always consult the project's **`PRD.md`** file located at the project root for clear understanding of goals and features.
+- Review all additional documentation files within the **`docs`** directory provided with the project.
+- If additional or updated documentation is required, use MCP servers (Brave Search, Puppeteer, FireCrawl) to locate official and current sources online.
+
+## Technical Stack Compliance
+
+- **Adhere strictly to the project's established technology stack.**
+- Do not introduce new technologies unless explicitly instructed and justified.
+- You may suggest alternative technologies if beneficial, but never implement them without user confirmation.
+</file>
+
+<file path=".cursor/rules/mcp-tool-usage.md">
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+## Sequential Thinking
+
+- Use **Sequential Thinking MCP** for debugging, troubleshooting, complex problem-solving, and detailed project planning.
+- Avoid excessive recursive calls; trigger intelligently only when new progress or significant information is possible.
+
+## Information Gathering (Brave Search, Puppeteer, FireCrawl)
+
+- Use **Brave Search, Puppeteer, and FireCrawl MCP servers** when troubleshooting, searching documentation, or exploring similar user issues.
+- Combine effectively with **Sequential Thinking MCP** to refine solutions and acquire up-to-date information.
+- Prioritize reliable and concise sources.
+
+## Browser Tools
+
+- **Browser Tools MCP** requires user confirmation. Always recommend the user explicitly start the server and ensure a Chromium browser is running before using Browser Tools MCP.
+- Let the user explicitly instruct Cursor when Browser Tools should be used.
+- Remind user to disable puppeteer before attempting to use
+
+## GitHub MCP
+
+- Commit and push code changes to GitHub using the **GitHub MCP server** after every successful test.
+- Ensure commits are clear, descriptive, and incremental.
+- Never overwrite or unintentionally alter files like README.md or other critical documentation without explicit user approval.
+</file>
+
+<file path=".github/workflows/sec-check.yaml">
+name: Security Checks
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly on Sundays
+
+jobs:
+  security-checks:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        
+      # CodeQL Analysis
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+      # NPM Audit
+      - name: Run npm audit
+        run: npm audit
+        continue-on-error: true
+
+      # ESLint Security Checks
+      - name: Run ESLint
+        run: npm run lint
+        
+      # Secret Scanning
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      # OSSAR Scan
+      - name: Run OSSAR
+        uses: github/ossar-action@v1
+        id: ossar
+
+      - name: Upload OSSAR results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.ossar.outputs.sarifFile }}
+
+      # NodeJSScan - Free Alternative to Snyk
+      - name: nodejsscan
+        uses: ajinabraham/njsscan-action@master
+        with:
+          args: '.'
+
+      # Dependency Review
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v3
+        if: github.event_name == 'pull_request'
+        
+      # Software Bill of Materials (SBOM) Generation
+      - name: Generate SBOM
+        uses: CycloneDX/gh-node-module-generatebom@master
+        with:
+          output: bom.xml
+          
+      # Results Processing
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v3
+        with:
+          name: bom
+          path: bom.xml
+          
+  security-matrix:
+    needs: security-checks
+    runs-on: ubuntu-latest
+    name: Security Matrix
+    steps:
+      - name: Security Matrix Report
+        run: |
+          echo "Security Checks Completed"
+          echo "Please review the results in the Security tab"
+</file>
+
+<file path=".eslintignore">
+node_modules/
+.git/
+.cursor/
+dist/
+coverage/
+*.min.js
+*.config.js
+</file>
+
+<file path=".eslintrc.json">
+{
+  "env": {
+    "node": true,
+    "es2021": true
+  },
+  "extends": [
+    "standard",
+    "plugin:security/recommended"
+  ],
+  "plugins": ["security"],
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "rules": {
+    "semi": ["error", "always"],
+    "no-unused-vars": "warn",
+    "no-console": "off",
+    "indent": ["error", 2],
+    "quotes": ["error", "single"],
+    "object-curly-spacing": ["error", "always"],
+    "security/detect-object-injection": "warn",
+    "security/detect-non-literal-require": "warn",
+    "security/detect-non-literal-fs-filename": "warn",
+    "security/detect-eval-with-expression": "error",
+    "security/detect-no-csrf-before-method-override": "error",
+    "security/detect-buffer-noassert": "error",
+    "security/detect-child-process": "warn",
+    "security/detect-disable-mustache-escape": "error",
+    "security/detect-new-buffer": "error"
+  }
+}
+</file>
+
+<file path=".gitignore">
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+out/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# FireCrawl specific
+firecrawl-credentials.json
+firecrawl.config.js
+</file>
+
+<file path="get-mcp-keys.js">
+#!/usr/bin/env node
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const { spawn } = require('child_process');
+
+// Path to .env.cursor in user's home directory
+const envPath = path.join(os.homedir(), '.mcprc');
+
+// Function to parse .env file
+function parseEnvFile (filePath) {
+  if (!fs.existsSync(filePath)) {
+    console.error(`Warning: Environment file not found at ${filePath}`);
+    return {};
+  }
+
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const env = {};
+
+    content.split('\n').forEach(line => {
+      // Skip comments and empty lines
+      if (!line || line.startsWith('#')) return;
+
+      // Parse KEY=VALUE format
+      const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+      if (match) {
+        const key = match[1];
+        let value = match[2] || '';
+
+        // Remove quotes if present
+        if (value.length > 0 && value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
+          value = value.replace(/^"|"$/g, '');
+        }
+
+        env[key] = value;
+      }
+    });
+
+    return env;
+  } catch (e) {
+    console.error(`Error reading .mcprc: ${e.message}`);
+    return {};
+  }
+}
+
+const envVars = parseEnvFile(envPath);
+const [command, ...args] = process.argv.slice(2);
+
+// Check if a command was provided
+if (!command) {
+  console.error('Error: No command specified');
+  process.exit(1);
+}
+
+// Run the command with the environment variables
+try {
+  // Create a combined environment with both system env vars and our loaded vars
+  const combinedEnv = { ...process.env, ...envVars };
+
+  // Debug - log the key environment variables (redacted for security)
+  if (combinedEnv.FIRECRAWL_API_KEY) {
+    const masked = combinedEnv.FIRECRAWL_API_KEY.substring(0, 5) + '...' +
+                 combinedEnv.FIRECRAWL_API_KEY.substring(combinedEnv.FIRECRAWL_API_KEY.length - 4);
+    console.error(`FIRECRAWL_API_KEY loaded: ${masked}`);
+  } else {
+    console.error('WARNING: FIRECRAWL_API_KEY not found in environment');
+  }
+
+  if (combinedEnv.BRAVE_API_KEY) {
+    const masked = combinedEnv.BRAVE_API_KEY.substring(0, 5) + '...' +
+                 combinedEnv.BRAVE_API_KEY.substring(combinedEnv.BRAVE_API_KEY.length - 4);
+    console.error(`BRAVE_API_KEY loaded: ${masked}`);
+  }
+
+  // Spawn the process with the combined environment
+  const child = spawn(command, args, {
+    env: combinedEnv,
+    stdio: 'inherit'
+  });
+
+  child.on('error', (err) => {
+    console.error(`Failed to start command: ${err.message}`);
+    process.exit(1);
+  });
+
+  child.on('exit', (code) => {
+    process.exit(code || 0);
+  });
+} catch (error) {
+  console.error(`Error executing command: ${error.message}`);
+  process.exit(1);
+}
+</file>
+
+<file path="package.json">
+{
+  "name": "@masonator/get-mcp-keys",
+  "version": "0.0.1",
+  "description": "A utility to load API keys from ~/.mcprc for Cursor MCP servers",
+  "main": "index.js",
+  "bin": {
+    "get-mcp-keys": "./get-mcp-keys.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "keywords": [
+    "cursor",
+    "mcp",
+    "api-keys",
+    "environment",
+    "secrets"
+  ],
+  "author": "Stuart Mason",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stumason/get-mcp-keys"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.6.0",
+    "eslint-plugin-security": "^3.0.1"
+  }
+}
+</file>
+
+<file path="README.md">
+# Get MCP Keys
+
+Cursor (perhaps other ai tools too?) allow you to create project specific MCP servers in the `./cursor/mcp.json` file.
+
+However, that means it's in the repo, so likely will end up commiting your env variables...
+
+```json
+{
+    "mcpServers": {
+        "firecrawl": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "firecrawl-mcp"
+            ],
+            "env": {
+                "FIRECRAWL_API_KEY": "oops-this-shouldnt-be-in-the-repo"
+            }
+        }
+    }
+}
+```
+
+In an effort to stop this, what I want to do here is have an rc file in the users home directory that contains the MCP Server envs you use. 
+
+> The MCP Server envs your using are likely user specific, so it makes sense to have them in your home directory. Will need to look at this again for when different projects are using different environment variables
+
+so something like:
+
+create the .mcprc file in the users home directory:
+
+```bash
+touch ~/.mcprc
+```
+
+add the following to the .mcprc file:
+
+```bash
+FIRECRAWL_API_KEY="oops-this-shouldnt-be-in-the-repo"
+```
+
+Then run this command before you run the mcp server, it would look something like this:
+
+```json
+{
+  "mcpServers": {
+    "firecrawl": {
+      "command": "npx",
+      "args": [
+        "@masonator/get-mcp-keys",
+        "npx",
+        "-y",
+        "firecrawl-mcp"
+      ]
+    }
+  }
+}
+```
+
+This would run the `get-mcp-keys` command first, grab the envs from the .mcprc file, and then run the `npx firecrawl-mcp` command with the envs it's grabbed.
+</file>
+
+</files>

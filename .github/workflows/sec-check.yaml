@@ -1,0 +1,110 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly on Sundays
+
+jobs:
+  security-checks:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        
+      # CodeQL Analysis
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+      # NPM Audit
+      - name: Run npm audit
+        run: npm audit
+        continue-on-error: true
+
+      # ESLint Security Checks
+      - name: Run ESLint
+        run: npm run lint
+        
+      # Secret Scanning
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      # OSSAR Scan
+      - name: Run OSSAR
+        uses: github/ossar-action@v1
+        id: ossar
+
+      - name: Upload OSSAR results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.ossar.outputs.sarifFile }}
+
+      # NodeJSScan - Free Alternative to Snyk
+      - name: nodejsscan
+        uses: ajinabraham/njsscan-action@master
+        with:
+          args: '.'
+
+      # Dependency Review
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v3
+        if: github.event_name == 'pull_request'
+        
+      # Software Bill of Materials (SBOM) Generation
+      - name: Generate SBOM
+        uses: CycloneDX/gh-node-module-generatebom@master
+        with:
+          output: bom.xml
+          
+      # Results Processing
+      - name: Upload SBOM
+        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+        with:
+          name: bom
+          path: bom.xml
+          
+  security-matrix:
+    needs: security-checks
+    runs-on: ubuntu-latest
+    name: Security Matrix
+    steps:
+      - name: Security Matrix Report
+        run: |
+          echo "Security Checks Completed"
+          echo "Please review the results in the Security tab"
