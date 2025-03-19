@@ -1,45 +1,10 @@
-# Get MCP Keys
+# 🔐 get-mcp-keys
 
-Cursor (perhaps other ai tools too?) allow you to create project specific MCP servers in the `./cursor/mcp.json` file.
+**Stop accidentally committing API keys to your repos!**
 
-However, that means it's in the repo, so likely will end up commiting your env variables...
+## The Problem
 
-```json
-{
-    "mcpServers": {
-        "firecrawl": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "firecrawl-mcp"
-            ],
-            "env": {
-                "FIRECRAWL_API_KEY": "oops-this-shouldnt-be-in-the-repo"
-            }
-        }
-    }
-}
-```
-
-In an effort to stop this, what I want to do here is have an rc file in the users home directory that contains the MCP Server envs you use. 
-
-> The MCP Server envs your using are likely user specific, so it makes sense to have them in your home directory. Will need to look at this again for when different projects are using different environment variables
-
-so something like:
-
-create the .mcprc file in the users home directory:
-
-```bash
-touch ~/.mcprc
-```
-
-add the following to the .mcprc file:
-
-```bash
-FIRECRAWL_API_KEY="oops-this-shouldnt-be-in-the-repo"
-```
-
-Then run this command before you run the mcp server, it would look something like this:
+When using Cursor AI (and other AI coding assistants) with MCP servers, you need API keys in your `./cursor/mcp.json` file:
 
 ```json
 {
@@ -47,7 +12,50 @@ Then run this command before you run the mcp server, it would look something lik
     "firecrawl": {
       "command": "npx",
       "args": [
-        "@masonator/get-mcp-keys",
+        "-y",
+        "firecrawl-mcp"
+      ],
+      "env": {
+        "FIRECRAWL_API_KEY": "sk_live_ohno-this-should-NOT-be-in-git" // 💀
+      }
+    }
+  }
+}
+```
+
+**This is a security nightmare waiting to happen.** One accidental commit and your keys are exposed in your Git history.
+
+## 💯 The Solution
+
+`get-mcp-keys` loads your API keys from a secure file in your home directory, keeping them out of your repositories entirely.
+
+## ⚡ Quick Start
+
+### 1. Create a `.mcprc` file in your home directory
+
+```bash
+touch ~/.mcprc
+chmod 600 ~/.mcprc  # Make it readable only by you
+```
+
+### 3. Add your API keys to the file
+
+```bash
+# ~/.mcprc
+FIRECRAWL_API_KEY="your_actual_api_key_here"
+BRAVE_API_KEY="another_secret_key_here"
+# Add any other MCP server keys you use
+```
+
+### 4. Update your MCP configuration to use get-mcp-keys
+
+```json
+{
+  "mcpServers": {
+    "firecrawl": {
+      "command": "npx",
+      "args": [
+        "@masonator/get-mcp-keys", // 🔐
         "npx",
         "-y",
         "firecrawl-mcp"
@@ -57,4 +65,36 @@ Then run this command before you run the mcp server, it would look something lik
 }
 ```
 
-This would run the `get-mcp-keys` command first, grab the envs from the .mcprc file, and then run the `npx firecrawl-mcp` command with the envs it's grabbed.
+**That's it!** The `get-mcp-keys` utility will:
+
+- Load your API keys from `~/.mcprc`
+- Inject them as environment variables
+- Run your MCP server command with the keys available
+
+## 🛡️ Security
+
+- Your API keys stay in your home directory
+- Keys are never committed to repositories
+- Keys are loaded only when needed
+- Debug output shows only first/last few characters of keys
+
+## 🧰 Supported MCP Servers
+
+Works with any MCP server that needs environment variables, including:
+
+- FireCrawl
+- Brave Search
+- Supabase
+- And any other MCP servers you configure!
+
+## 🔍 How It Works
+
+`get-mcp-keys` reads your `.mcprc` file, adds those environment variables to the current environment, and then executes whatever command you specify after it in the args list. It's simple yet effective!
+
+## 📋 License
+
+MIT
+
+---
+
+⭐ If this saved you from committing your keys, star the repo!

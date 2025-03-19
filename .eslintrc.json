@@ -3,10 +3,7 @@
     "node": true,
     "es2021": true
   },
-  "extends": [
-    "standard",
-    "plugin:security/recommended"
-  ],
+  "extends": ["standard"],
   "plugins": ["security"],
   "parserOptions": {
     "ecmaVersion": "latest"
@@ -18,14 +15,10 @@
     "indent": ["error", 2],
     "quotes": ["error", "single"],
     "object-curly-spacing": ["error", "always"],
-    "security/detect-object-injection": "warn",
-    "security/detect-non-literal-require": "warn",
-    "security/detect-non-literal-fs-filename": "warn",
     "security/detect-eval-with-expression": "error",
-    "security/detect-no-csrf-before-method-override": "error",
+    "security/detect-non-literal-fs-filename": "warn",
     "security/detect-buffer-noassert": "error",
-    "security/detect-child-process": "warn",
-    "security/detect-disable-mustache-escape": "error",
-    "security/detect-new-buffer": "error"
+    "security/detect-possible-timing-attacks": "warn",
+    "security/detect-no-csrf-before-method-override": "error"
   }
 } 

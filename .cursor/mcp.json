@@ -1,9 +1,9 @@
 {
     "mcpServers": {
         "firecrawl": {
-            "command": "node",
+            "command": "npx",
             "args": [
-                "/Users/stuartmason/Code/JeredBlu/get-mcp-keys.js",
+                "@masonator/get-mcp-keys",
                 "npx",
                 "-y",
                 "firecrawl-mcp"
