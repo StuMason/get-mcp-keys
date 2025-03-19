@@ -1,0 +1,28 @@
+{
+  "name": "@stumason/get-mcp-keys",
+  "version": "1.0.0",
+  "description": "A utility to load API keys from .mcprc for Cursor MCP servers",
+  "main": "index.js",
+  "bin": {
+    "get-mcp-keys": "./get-mcp-keys.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cursor",
+    "mcp",
+    "api-keys",
+    "environment",
+    "secrets"
+  ],
+  "author": "Stuart Mason",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stumason/get-mcp-keys"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}

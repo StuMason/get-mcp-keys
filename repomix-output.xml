@@ -1,0 +1,278 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+<additional_info>
+
+</additional_info>
+
+</file_summary>
+
+<directory_structure>
+.cursor/
+  rules/
+    coding-best-practices.md
+    database-rules.md
+    documentation-and-techstack.md
+    mcp-tool-usage.md
+  mcp.json
+get-keys.js
+package.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".cursor/rules/coding-best-practices.md">
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+## Coding Best Practices
+
+- **Do not modify code or UI elements that already work**, unless explicitly instructed.
+- Avoid duplicating existing functionality; reuse working components whenever possible.
+- Write comprehensive tests for all new or modified functionality.
+- **Never unintentionally delete data or code**; confirm explicitly before destructive actions.
+- Commit frequently to maintain a reliable project history.
+- Always ask clarifying questions if tasks or requirements are unclear.
+
+## User Interface (UI)
+
+- **Never change or affect the UI unintentionally.** Only alter UI components if explicitly instructed or clearly part of the assigned task.
+- Always ensure UI changes are fully tested and validated.
+</file>
+
+<file path=".cursor/rules/database-rules.md">
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+## Supabase (Postgres MCP - Development Only)
+
+- Always use the project-specific **Supabase MCP server** for database operations.
+- Use structured relational SQL storage provided by Supabase. Avoid using raw JSON file storage for structured data unless explicitly required by schema design.
+- Database operations are **strictly for the development environment only**.
+- **Never delete or alter critical data without explicit confirmation.** Operations should be carefully controlled.
+</file>
+
+<file path=".cursor/rules/documentation-and-techstack.md">
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+## Documentation Usage
+
+- Always consult the project's **`PRD.md`** file located at the project root for clear understanding of goals and features.
+- Review all additional documentation files within the **`docs`** directory provided with the project.
+- If additional or updated documentation is required, use MCP servers (Brave Search, Puppeteer, FireCrawl) to locate official and current sources online.
+
+## Technical Stack Compliance
+
+- **Adhere strictly to the project's established technology stack.**
+- Do not introduce new technologies unless explicitly instructed and justified.
+- You may suggest alternative technologies if beneficial, but never implement them without user confirmation.
+</file>
+
+<file path=".cursor/rules/mcp-tool-usage.md">
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+## Sequential Thinking
+
+- Use **Sequential Thinking MCP** for debugging, troubleshooting, complex problem-solving, and detailed project planning.
+- Avoid excessive recursive calls; trigger intelligently only when new progress or significant information is possible.
+
+## Information Gathering (Brave Search, Puppeteer, FireCrawl)
+
+- Use **Brave Search, Puppeteer, and FireCrawl MCP servers** when troubleshooting, searching documentation, or exploring similar user issues.
+- Combine effectively with **Sequential Thinking MCP** to refine solutions and acquire up-to-date information.
+- Prioritize reliable and concise sources.
+
+## Browser Tools
+
+- **Browser Tools MCP** requires user confirmation. Always recommend the user explicitly start the server and ensure a Chromium browser is running before using Browser Tools MCP.
+- Let the user explicitly instruct Cursor when Browser Tools should be used.
+- Remind user to disable puppeteer before attempting to use
+
+## GitHub MCP
+
+- Commit and push code changes to GitHub using the **GitHub MCP server** after every successful test.
+- Ensure commits are clear, descriptive, and incremental.
+- Never overwrite or unintentionally alter files like README.md or other critical documentation without explicit user approval.
+</file>
+
+<file path=".cursor/mcp.json">
+{
+    "mcpServers": {
+        "firecrawl": {
+            "command": "node",
+            "args": [
+                "/Users/stuartmason/Code/JeredBlu/get-keys.js",
+                "npx",
+                "-y",
+                "firecrawl-mcp"
+            ],
+            "env": {
+                "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+            }
+        }
+    }
+}
+</file>
+
+<file path="get-keys.js">
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const { spawn } = require('child_process');
+
+// Path to .env.cursor in user's home directory
+const envPath = path.join(os.homedir(), '.mcprc');
+
+// Function to parse .env file
+function parseEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) {
+    console.error(`Warning: Environment file not found at ${filePath}`);
+    return {};
+  }
+  
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const env = {};
+    
+    content.split('\n').forEach(line => {
+      // Skip comments and empty lines
+      if (!line || line.startsWith('#')) return;
+      
+      // Parse KEY=VALUE format
+      const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+      if (match) {
+        const key = match[1];
+        let value = match[2] || '';
+        
+        // Remove quotes if present
+        if (value.length > 0 && value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
+          value = value.replace(/^"|"$/g, '');
+        }
+        
+        env[key] = value;
+      }
+    });
+    
+    return env;
+  } catch (e) {
+    console.error(`Error reading .env.cursor: ${e.message}`);
+    return {};
+  }
+}
+
+// Get environment variables from .env.cursor
+const envVars = parseEnvFile(envPath);
+
+// Get the command and arguments
+const [command, ...args] = process.argv.slice(2);
+
+// Check if a command was provided
+if (!command) {
+  console.error('Error: No command specified');
+  process.exit(1);
+}
+
+// Run the command with the environment variables
+try {
+  // Create a combined environment with both system env vars and our loaded vars
+  const combinedEnv = { ...process.env, ...envVars };
+  
+  // Debug - log the key environment variables (redacted for security)
+  if (combinedEnv.FIRECRAWL_API_KEY) {
+    const masked = combinedEnv.FIRECRAWL_API_KEY.substring(0, 5) + '...' + 
+                 combinedEnv.FIRECRAWL_API_KEY.substring(combinedEnv.FIRECRAWL_API_KEY.length - 4);
+    console.error(`FIRECRAWL_API_KEY loaded: ${masked}`);
+  } else {
+    console.error('WARNING: FIRECRAWL_API_KEY not found in environment');
+  }
+  
+  if (combinedEnv.BRAVE_API_KEY) {
+    const masked = combinedEnv.BRAVE_API_KEY.substring(0, 5) + '...' + 
+                 combinedEnv.BRAVE_API_KEY.substring(combinedEnv.BRAVE_API_KEY.length - 4);
+    console.error(`BRAVE_API_KEY loaded: ${masked}`);
+  }
+  
+  // Spawn the process with the combined environment
+  const child = spawn(command, args, {
+    env: combinedEnv,
+    stdio: 'inherit'
+  });
+
+  child.on('error', (err) => {
+    console.error(`Failed to start command: ${err.message}`);
+    process.exit(1);
+  });
+
+  child.on('exit', (code) => {
+    process.exit(code || 0);
+  });
+} catch (error) {
+  console.error(`Error executing command: ${error.message}`);
+  process.exit(1);
+}
+</file>
+
+<file path="package.json">
+{
+  "name": "mcp-cursor-secrets",
+  "version": "0.0.1",
+  "description": "Dont commit them secrets!",
+  "main": "get-keys.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
+}
+</file>
+
+</files>
